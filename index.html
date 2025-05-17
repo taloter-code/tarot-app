@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ワンオラクル・タロット占い</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #121212;
+      color: #eee;
+      text-align: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 20px 0;
+    }
+    button:hover {
+      background-color: #666;
+    }
+    #cardImage {
+      width: 200px;
+      margin: 20px 0;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ワンオラクル・タロット占い</h1>
+    <button id="drawButton">カードを引く</button>
+    <div id="result" class="hidden">
+      <img id="cardImage" src="" alt="タロットカード">
+      <h2 id="cardName"></h2>
+      <p id="cardMeaning"></p>
+    </div>
+  </div>
+
+  <script>
+    const cards = [
+      {
+        name: "愚者",
+        image: "https://upload.wikimedia.org/wikipedia/commons/9/90/RWS_Tarot_00_Fool.jpg",
+        upright: "自由、冒険、無限の可能性",
+        reversed: "無計画、愚かさ、逃避"
+      },
+      {
+        name: "魔術師",
+        image: "https://upload.wikimedia.org/wikipedia/commons/d/de/RWS_Tarot_01_Magician.jpg",
+        upright: "創造力、始まり、自信",
+        reversed: "欺瞞、不器用、未熟"
+      },
+      {
+        name: "女教皇",
+        image: "https://upload.wikimedia.org/wikipedia/commons/8/88/RWS_Tarot_02_High_Priestess.jpg",
+        upright: "直感、秘密、知恵",
+        reversed: "秘密の暴露、混乱、無知"
+      }
+    ];
+
+    function getRandomCard(cards) {
+      const card = cards[Math.floor(Math.random() * cards.length)];
+      const isUpright = Math.random() < 0.5;
+      return {
+        ...card,
+        isUpright,
+        meaning: isUpright ? card.upright : card.reversed,
+        orientation: isUpright ? "正位置" : "逆位置"
+      };
+    }
+
+    document.getElementById("drawButton").addEventListener("click", () => {
+      const card = getRandomCard(cards);
+      document.getElementById("cardImage").src = card.image;
+      document.getElementById("cardImage").style.transform = card.isUpright ? "rotate(0deg)" : "rotate(180deg)";
+      document.getElementById("cardName").textContent = `${card.name}（${card.orientation}）`;
+      document.getElementById("cardMeaning").textContent = card.meaning;
+      document.getElementById("result").classList.remove("hidden");
+    });
+  </script>
+</body>
+</html>
