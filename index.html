@@ -1,9 +1,14 @@
+(件名なし)
+crystal-parleaf@docomo.ne.jp
+​
+自分
+​
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>ワンオラクル・タロット占い</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>タロット占い - JSON読み込み版</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -13,10 +18,10 @@
       padding: 20px;
     }
     .container {
-      max-width: 600px;
+      max-width: 900px;
       margin: auto;
     }
-    button {
+    button, select {
       padding: 10px 20px;
       font-size: 18px;
       background-color: #444;
@@ -24,55 +29,59 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      margin: 20px 0;
+      margin: 10px;
     }
     button:hover {
       background-color: #666;
     }
-    #cardImage {
-      width: 200px;
-      margin: 20px 0;
+    #spreadArea {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
     }
-    .hidden {
-      display: none;
+    .cardBlock {
+      margin: 10px;
+      text-align: center;
+      width: 160px;
+    }
+    .cardBlock img {
+      width: 140px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.3);
+      transition: transform 0.3s;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>ワンオラクル・タロット占い</h1>
+    <h1>タロット占い</h1>
+    <label for="spreadSelect">スプレッドを選択：</label>
+    <select id="spreadSelect">
+      <option value="1">1枚スプレッド</option>
+      <option value="3">3枚スプレッド</option>
+      <option value="7">7枚スプレッド</option>
+    </select>
     <button id="drawButton">カードを引く</button>
-    <div id="result" class="hidden">
-      <img id="cardImage" src="" alt="タロットカード">
-      <h2 id="cardName"></h2>
-      <p id="cardMeaning"></p>
-    </div>
+    <div id="spreadArea"></div>
   </div>
 
   <script>
-    const cards = [
-      {
-        name: "愚者",
-        image: "https://upload.wikimedia.org/wikipedia/commons/9/90/RWS_Tarot_00_Fool.jpg",
-        upright: "自由、冒険、無限の可能性",
-        reversed: "無計画、愚かさ、逃避"
-      },
-      {
-        name: "魔術師",
-        image: "https://upload.wikimedia.org/wikipedia/commons/d/de/RWS_Tarot_01_Magician.jpg",
-        upright: "創造力、始まり、自信",
-        reversed: "欺瞞、不器用、未熟"
-      },
-      {
-        name: "女教皇",
-        image: "https://upload.wikimedia.org/wikipedia/commons/8/88/RWS_Tarot_02_High_Priestess.jpg",
-        upright: "直感、秘密、知恵",
-        reversed: "秘密の暴露、混乱、無知"
-      }
-    ];
+    let cards = [];
 
-    function getRandomCard(cards) {
-      const card = cards[Math.floor(Math.random() * cards.length)];
+    async function loadCards() {
+      try {
+        const res = await fetch("cards.json");
+        cards = await res.json();
+      } catch (error) {
+        alert("カードデータの読み込みに失敗しました。");
+        console.error(error);
+      }
+    }
+
+    function getRandomCard(deck) {
+      const index = Math.floor(Math.random() * deck.length);
+      const card = deck.splice(index, 1)[0];
       const isUpright = Math.random() < 0.5;
       return {
         ...card,
@@ -83,13 +92,28 @@
     }
 
     document.getElementById("drawButton").addEventListener("click", () => {
-      const card = getRandomCard(cards);
-      document.getElementById("cardImage").src = card.image;
-      document.getElementById("cardImage").style.transform = card.isUpright ? "rotate(0deg)" : "rotate(180deg)";
-      document.getElementById("cardName").textContent = `${card.name}（${card.orientation}）`;
-      document.getElementById("cardMeaning").textContent = card.meaning;
-      document.getElementById("result").classList.remove("hidden");
+      const spreadCount = parseInt(document.getElementById("spreadSelect").value);
+      const workingDeck = [...cards];
+      const results = [];
+      for (let i = 0; i < spreadCount; i++) {
+        results.push(getRandomCard(workingDeck));
+      }
+
+      const spreadArea = document.getElementById("spreadArea");
+      spreadArea.innerHTML = "";
+      results.forEach(card => {
+        const cardDiv = document.createElement("div");
+        cardDiv.className = "cardBlock";
+        cardDiv.innerHTML = `
+          <img src="${card.image}" alt="${card.name}" style="transform: rotate(${card.isUpright ? 0 : 180}deg);">
+          <h3>${card.name}（${card.orientation}）</h3>
+          <p>${card.meaning}</p>
+        `;
+        spreadArea.appendChild(cardDiv);
+      });
     });
+
+    loadCards();
   </script>
 </body>
 </html>
